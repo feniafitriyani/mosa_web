@@ -23,7 +23,6 @@ import '../widgets/layer_control.dart';
 import '../widgets/asset_popup.dart';
 import '../widgets/task_history_table.dart';
 import '../widgets/asset_tracking_table.dart';
-import '../services/shp_reader.dart';
 
 class MapsScreen extends StatefulWidget {
   final VoidCallback? onToggleTheme;
@@ -71,6 +70,10 @@ class _MapsScreenState extends State<MapsScreen> {
   List<List<LatLng>> _blokPolygons = [];
   bool _showBlokPolygons = true; // always on for now
 
+  // Berau_3_Pit overlay polygons (loaded from GeoJSON)
+  List<List<LatLng>> _pitPolygons = [];
+  bool _showPitPolygons = true; // always on for now
+
   // Filter states
   String? _selectedSite;
   EquipmentType? _selectedEquipmentType;
@@ -87,7 +90,7 @@ class _MapsScreenState extends State<MapsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadGeoTiffOverlay(); // Prioritaskan overlay dasar terlebih dahulu
       _loadBerauBlokGeoJson(); // Muat layer polygon setelah peta tampil
-      _loadBerauBlokShp(); // Shapefile juga ditunda agar startup cepat
+      _loadBerauPitGeoJson(); // Muat layer pit polygon
     });
   }
 
@@ -271,22 +274,22 @@ class _MapsScreenState extends State<MapsScreen> {
     }
   }
 
-  // Load Berau_3_Blok polygons from GeoJSON in assets/maps/Berau_3_Blok.geojson
+  // Load Berau_3_Blok polygons from GeoJSON in assets/maps/Berau_3_Blok.json
   Future<void> _loadBerauBlokGeoJson() async {
     try {
       final jsonStr = await rootBundle.loadString(
-        'assets/maps/Berau_3_Blok.geojson',
+        'assets/maps/Berau_3_Blok.json',
       );
       final data = json.decode(jsonStr) as Map<String, dynamic>;
-      final features = data['features'] as List<dynamic>?;
-      if (features == null) return;
+
+      // Handle GeometryCollection
+      final geometries = data['geometries'] as List<dynamic>?;
+      if (geometries == null) return;
 
       final List<List<LatLng>> polygons = [];
 
-      for (final f in features) {
-        final feature = f as Map<String, dynamic>;
-        final geometry = feature['geometry'] as Map<String, dynamic>?;
-        if (geometry == null) continue;
+      for (final g in geometries) {
+        final geometry = g as Map<String, dynamic>;
         final type = geometry['type'] as String?;
         final coords = geometry['coordinates'];
 
@@ -330,23 +333,51 @@ class _MapsScreenState extends State<MapsScreen> {
         _blokPolygons = polygons;
       });
     } catch (e) {
-      debugPrint('Failed to load Berau_3_Blok.geojson: $e');
+      debugPrint('Failed to load Berau_3_Blok.json: $e');
     }
   }
 
-  // Load Berau_3_Blok polygons directly from Shapefile in assets/maps/Berau_3_Blok.shp
-  Future<void> _loadBerauBlokShp() async {
+  // Load Berau_3_Pit polygons from GeoJSON in assets/maps/Berau_3_Pit.json
+  Future<void> _loadBerauPitGeoJson() async {
     try {
-      final polygons = await ShpReader.loadPolygonRingsFromAsset(
-        'assets/maps/Berau_3_Blok.shp',
+      final jsonStr = await rootBundle.loadString(
+        'assets/maps/Berau_3_Pit.json',
       );
-      if (polygons.isEmpty) return;
+      final data = json.decode(jsonStr) as Map<String, dynamic>;
+      final features = data['features'] as List<dynamic>?;
+      if (features == null) return;
+
+      final List<List<LatLng>> polygons = [];
+
+      for (final f in features) {
+        final feature = f as Map<String, dynamic>;
+        final geometry = feature['geometry'] as Map<String, dynamic>?;
+        if (geometry == null) continue;
+        final type = geometry['type'] as String?;
+        final coords = geometry['coordinates'];
+
+        if (type == 'Polygon') {
+          final rings = coords as List<dynamic>;
+          if (rings.isEmpty) continue;
+          final outerRing = rings.first as List<dynamic>;
+          final List<LatLng> latlngs =
+              outerRing
+                  .map(
+                    (p) => LatLng(
+                      (p[1] as num).toDouble(),
+                      (p[0] as num).toDouble(),
+                    ),
+                  )
+                  .toList();
+          polygons.add(latlngs);
+        }
+      }
+
       setState(() {
-        // Merge/append with existing polygons from GeoJSON (if any)
-        _blokPolygons = [..._blokPolygons, ...polygons];
+        _pitPolygons = polygons;
       });
     } catch (e) {
-      debugPrint('Failed to load Berau_3_Blok.shp: $e');
+      debugPrint('Failed to load Berau_3_Pit.json: $e');
     }
   }
 
@@ -1023,6 +1054,23 @@ class _MapsScreenState extends State<MapsScreen> {
                                                 color: Colors.orange
                                                     .withOpacity(0.15), // fill
                                                 borderColor: Colors.deepOrange,
+                                                borderStrokeWidth: 2,
+                                              ),
+                                            )
+                                            .toList(),
+                                  ),
+                                // Berau_3_Pit polygons layer
+                                if (_showPitPolygons && _pitPolygons.isNotEmpty)
+                                  PolygonLayer(
+                                    polygons:
+                                        _pitPolygons
+                                            .map(
+                                              (ring) => Polygon<Object>(
+                                                points: ring,
+                                                color: Colors.blue.withOpacity(
+                                                  0.15,
+                                                ), // fill
+                                                borderColor: Colors.blue,
                                                 borderStrokeWidth: 2,
                                               ),
                                             )
