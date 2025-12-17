@@ -4,10 +4,9 @@
     {
       "type": "Polygon",
       "properties": {
-        "id": "A",
+        "cpk": "A",
         "block": "A",
-        "name": "Block A",
-        "jenis": "block"
+        "name": "Block A"
       },
       "coordinates": [[
         [117.4313405, 2.0598319],
@@ -20,10 +19,9 @@
     {
       "type": "Polygon",
       "properties": {
-        "id": "B",
+        "cpk": "B",
         "block": "B",
-        "name": "Block B",
-        "jenis": "block"
+        "name": "Block B"
       },
       "coordinates": [[
         [117.4313405, 2.0661059],
@@ -36,10 +34,9 @@
     {
       "type": "Polygon",
       "properties": {
-        "id": "C",
+        "cpk": "C",
         "block": "C",
-        "name": "Block C",
-        "jenis": "block"
+        "name": "Block C"
       },
       "coordinates": [[
         [117.4313405, 2.0786549],
@@ -52,10 +49,9 @@
     {
       "type": "Polygon",
       "properties": {
-        "id": "D",
+        "cpk": "D",
         "block": "D",
-        "name": "Block D",
-        "jenis": "block"
+        "name": "Block D"
       },
       "coordinates": [[
         [117.4313405, 2.0912039],

@@ -1051,8 +1051,8 @@ class _MapsScreenState extends State<MapsScreen> {
                                             .map(
                                               (ring) => Polygon<Object>(
                                                 points: ring,
-                                                color: Colors.orange
-                                                    .withOpacity(0.15), // fill
+                                                color:
+                                                    Colors.transparent, // fill
                                                 borderColor: Colors.deepOrange,
                                                 borderStrokeWidth: 2,
                                               ),
