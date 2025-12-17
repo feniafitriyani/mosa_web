@@ -15,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../models/asset.dart';
 import '../services/data_service.dart';
+import '../services/map_service.dart';
 import '../widgets/asset_sidebar.dart';
 
 import '../widgets/map_controls.dart';
@@ -274,13 +275,11 @@ class _MapsScreenState extends State<MapsScreen> {
     }
   }
 
-  // Load Berau_3_Blok polygons from GeoJSON in assets/maps/Berau_3_Blok.json
+  // Load Berau_3_Blok polygons dari API (fallback ke asset lokal jika gagal)
   Future<void> _loadBerauBlokGeoJson() async {
     try {
-      final jsonStr = await rootBundle.loadString(
-        'assets/maps/Berau_3_Blok.json',
-      );
-      final data = json.decode(jsonStr) as Map<String, dynamic>;
+      // Ambil GeoJSON block dari API
+      final data = await MapService.fetchBlocksGeoJson();
 
       // Handle GeometryCollection
       final geometries = data['geometries'] as List<dynamic>?;
@@ -329,21 +328,83 @@ class _MapsScreenState extends State<MapsScreen> {
         }
       }
 
-      setState(() {
-        _blokPolygons = polygons;
-      });
+      if (mounted) {
+        setState(() {
+          _blokPolygons = polygons;
+        });
+      }
     } catch (e) {
-      debugPrint('Failed to load Berau_3_Blok.json: $e');
+      debugPrint('Failed to load Berau_3_Blok from API: $e');
+
+      // Fallback: coba load dari asset lokal supaya peta tetap jalan
+      // try {
+      //   final jsonStr = await rootBundle.loadString(
+      //     'assets/maps/Berau_3_Blok.json',
+      //   );
+      //   final data = json.decode(jsonStr) as Map<String, dynamic>;
+
+      //   final geometries = data['geometries'] as List<dynamic>?;
+      //   if (geometries == null) return;
+
+      //   final List<List<LatLng>> polygons = [];
+
+      //   for (final g in geometries) {
+      //     final geometry = g as Map<String, dynamic>;
+      //     final type = geometry['type'] as String?;
+      //     final coords = geometry['coordinates'];
+
+      //     if (type == 'Polygon') {
+      //       // Polygon: coordinates is List<List<[lng, lat]>>
+      //       final rings = coords as List<dynamic>;
+      //       if (rings.isEmpty) continue;
+      //       final outerRing = rings.first as List<dynamic>;
+      //       final List<LatLng> latlngs =
+      //           outerRing
+      //               .map(
+      //                 (p) => LatLng(
+      //                   (p[1] as num).toDouble(),
+      //                   (p[0] as num).toDouble(),
+      //                 ),
+      //               )
+      //               .toList();
+      //       polygons.add(latlngs);
+      //     } else if (type == 'MultiPolygon') {
+      //       // MultiPolygon: List<List<List<[lng, lat]>>>
+      //       final multi = coords as List<dynamic>;
+      //       for (final poly in multi) {
+      //         final rings = poly as List<dynamic>;
+      //         if (rings.isEmpty) continue;
+      //         final outerRing = rings.first as List<dynamic>;
+      //         final List<LatLng> latlngs =
+      //             outerRing
+      //                 .map(
+      //                   (p) => LatLng(
+      //                     (p[1] as num).toDouble(),
+      //                     (p[0] as num).toDouble(),
+      //                   ),
+      //                 )
+      //                 .toList();
+      //         polygons.add(latlngs);
+      //       }
+      //     }
+      //   }
+
+      //   if (mounted) {
+      //     setState(() {
+      //       _blokPolygons = polygons;
+      //     });
+      //   }
+      // } catch (e2) {
+      //   debugPrint('Failed to load Berau_3_Blok from asset: $e2');
+      // }
     }
   }
 
-  // Load Berau_3_Pit polygons from GeoJSON in assets/maps/Berau_3_Pit.json
+  // Load Berau_3_Pit polygons dari API `/get-pit` (tanpa fallback ke asset lokal)
   Future<void> _loadBerauPitGeoJson() async {
     try {
-      final jsonStr = await rootBundle.loadString(
-        'assets/maps/Berau_3_Pit.json',
-      );
-      final data = json.decode(jsonStr) as Map<String, dynamic>;
+      // Ambil GeoJSON pit dari API
+      final data = await MapService.fetchPitsGeoJson();
       final features = data['features'] as List<dynamic>?;
       if (features == null) return;
 
@@ -373,11 +434,14 @@ class _MapsScreenState extends State<MapsScreen> {
         }
       }
 
-      setState(() {
-        _pitPolygons = polygons;
-      });
+      if (mounted) {
+        setState(() {
+          _pitPolygons = polygons;
+        });
+      }
     } catch (e) {
-      debugPrint('Failed to load Berau_3_Pit.json: $e');
+      // Sesuai permintaan: tidak ada baca JSON lokal, hanya dari API
+      debugPrint('Failed to load Berau_3_Pit from API: $e');
     }
   }
 
