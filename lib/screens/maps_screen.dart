@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,6 +14,8 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../models/asset.dart';
 import '../services/data_service.dart';
+import '../services/geojson_service.dart';
+// removed unused import: map_service
 import '../widgets/asset_sidebar.dart';
 
 import '../widgets/map_controls.dart';
@@ -66,13 +67,40 @@ class _MapsScreenState extends State<MapsScreen> {
     LatLng(2.14, 117.38), // north-east (adjusted)
   );
 
-  // Berau_3_Blok overlay polygons (loaded from GeoJSON)
-  List<List<LatLng>> _blokPolygons = [];
-  bool _showBlokPolygons = true; // always on for now
+  // Sarijadi_Blocks_Strips overlay polygons (loaded from GeoJSON).
+  // Dipakai bersama [StyledPolygon] supaya label "A-01" / "B-01" bisa digambar.
+  List<StyledPolygon> _blockStripPolygons = [];
+  bool _showBlockStripPolygons = true; // default on
 
-  // Berau_3_Pit overlay polygons (loaded from GeoJSON)
-  List<List<LatLng>> _pitPolygons = [];
-  bool _showPitPolygons = true; // always on for now
+  // Berau_3_Track overlay polylines (loaded from GeoJSON)
+  List<List<LatLng>> _trackPolylines = [];
+  bool _showTrackPolylines = true; // default off
+
+  // Berau_3_Point overlay markers (loaded from GeoJSON)
+  List<Marker> _letterPointMarkers = [];
+  List<Marker> _pitPointMarkers = [];
+  bool _showLetterPoints = true;
+  bool _showPitPoints = true;
+  bool _showPointMarkers = true; // default off
+  Set<String> _visiblePointNames = {};
+  List<String> _allPointNames = [];
+
+  // Sarijadi_Area overlay polygons (BLOCK A/B, SOIL, ODP, ISP, PORT).
+  List<StyledPolygon> _sarijadiAreaPolygons = [];
+  bool _showSarijadiAreaPolygons = true;
+
+  // Sarijadi_Blocks overlay polygons (grid box-1 .. box-4).
+  List<StyledPolygon> _sarijadiBlockPolygons = [];
+  bool _showSarijadiBlockPolygons = true;
+
+  // Label untuk ketiga layer Sarijadi di atas.
+  bool _showSarijadiLabels = true;
+
+  // Sarijadi_Points overlay — titik sudut (corner) tiap area dan titik PIT.
+  // Satu warna seragam, sama seperti layer polygon di atas.
+  List<StyledPoint> _sarijadiPoints = [];
+  bool _showSarijadiPoints = true;
+  bool _showCornerPoints = true; // titik corner tiap area
 
   // Filter states
   String? _selectedSite;
@@ -89,8 +117,11 @@ class _MapsScreenState extends State<MapsScreen> {
     // Tunda pekerjaan berat sampai frame pertama dirender agar tidak blok UI awal
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadGeoTiffOverlay(); // Prioritaskan overlay dasar terlebih dahulu
-      _loadBerauBlokGeoJson(); // Muat layer polygon setelah peta tampil
-      _loadBerauPitGeoJson(); // Muat layer pit polygon
+      // Tiga layer geospasial Sarijadi (grid block, area, dan block strip).
+      _loadSarijadiBlockGeoJson(); // assets/maps/Sarijadi_Blocks.json
+      _loadSarijadiAreaGeoJson(); // assets/maps/Sarijadi_Area.json
+      _loadBerauBlockStripGeoJson(); // assets/maps/Sarijadi_Blocks_Strips.json
+      _loadSarijadiPointsGeoJson(); // assets/maps/Sarijadi_Points.json
     });
   }
 
@@ -134,7 +165,29 @@ class _MapsScreenState extends State<MapsScreen> {
     return Uint8List.fromList(img.encodePng(resized, level: 1));
   }
 
+  /// Baca bounds peta dari file JSON.
+  ///
+  /// Bounds inilah yang dipakai untuk meletakkan gambar
+  /// `assets/maps/Berau_3.webp` di atas peta (gambar tetap Berau_3.webp,
+  /// tetapi koordinat/extent-nya mengikuti file Sarijadi).
+  ///
+  /// Urutan sumber:
+  /// 1. `assets/maps/Sarijadi_Bounds.json` — GeoJSON FeatureCollection,
+  ///    bounds dihitung otomatis dari koordinat polygon.
+  /// 2. `assets/maps/berau.bounds.json` — format lama
+  ///    `{ minLat, minLng, maxLat, maxLng }` sebagai fallback.
   Future<LatLngBounds?> _tryLoadBoundsFromJson() async {
+    // 1) Prioritaskan Sarijadi_Bounds.json (GeoJSON FeatureCollection)
+    try {
+      final bounds = await GeoJsonService.loadBounds(
+        'assets/maps/Sarijadi_Bounds.json',
+      );
+      if (bounds != null) return bounds;
+    } catch (_) {
+      // Abaikan, lanjut ke format fallback
+    }
+
+    // 2) Fallback: format sederhana berau.bounds.json
     try {
       final jsonStr = await rootBundle.loadString(
         'assets/maps/berau.bounds.json',
@@ -274,111 +327,288 @@ class _MapsScreenState extends State<MapsScreen> {
     }
   }
 
-  // Load Berau_3_Blok polygons from GeoJSON in assets/maps/Berau_3_Blok.json
-  Future<void> _loadBerauBlokGeoJson() async {
+  /// Load polygon grid blok dari `assets/maps/Sarijadi_Blocks.json`.
+  ///
+  /// Berisi 4 kotak persegi (`box-1` .. `box-4`) yang membagi area peta
+  /// menjadi grid. File ini tidak membawa gaya, jadi semua kotak memakai
+  /// satu warna seragam dari [GeoJsonService.defaultColor].
+  Future<void> _loadSarijadiBlockGeoJson() async {
     try {
-      final jsonStr = await rootBundle.loadString(
-        'assets/maps/Berau_3_Blok.json',
+      final polygons = await GeoJsonService.loadStyledPolygons(
+        'assets/maps/Sarijadi_Blocks.json',
       );
-      final data = json.decode(jsonStr) as Map<String, dynamic>;
-
-      // Handle GeometryCollection
-      final geometries = data['geometries'] as List<dynamic>?;
-      if (geometries == null) return;
-
-      final List<List<LatLng>> polygons = [];
-
-      for (final g in geometries) {
-        final geometry = g as Map<String, dynamic>;
-        final type = geometry['type'] as String?;
-        final coords = geometry['coordinates'];
-
-        if (type == 'Polygon') {
-          // Polygon: coordinates is List<List<[lng, lat]>>
-          final rings = coords as List<dynamic>;
-          if (rings.isEmpty) continue;
-          final outerRing = rings.first as List<dynamic>;
-          final List<LatLng> latlngs =
-              outerRing
-                  .map(
-                    (p) => LatLng(
-                      (p[1] as num).toDouble(),
-                      (p[0] as num).toDouble(),
-                    ),
-                  )
-                  .toList();
-          polygons.add(latlngs);
-        } else if (type == 'MultiPolygon') {
-          // MultiPolygon: List<List<List<[lng, lat]>>>
-          final multi = coords as List<dynamic>;
-          for (final poly in multi) {
-            final rings = poly as List<dynamic>;
-            if (rings.isEmpty) continue;
-            final outerRing = rings.first as List<dynamic>;
-            final List<LatLng> latlngs =
-                outerRing
-                    .map(
-                      (p) => LatLng(
-                        (p[1] as num).toDouble(),
-                        (p[0] as num).toDouble(),
-                      ),
-                    )
-                    .toList();
-            polygons.add(latlngs);
-          }
-        }
-      }
-
+      if (!mounted) return;
       setState(() {
-        _blokPolygons = polygons;
+        _sarijadiBlockPolygons = polygons;
       });
     } catch (e) {
-      debugPrint('Failed to load Berau_3_Blok.json: $e');
+      debugPrint('Failed to load Sarijadi_Blocks: $e');
     }
   }
 
-  // Load Berau_3_Pit polygons from GeoJSON in assets/maps/Berau_3_Pit.json
-  Future<void> _loadBerauPitGeoJson() async {
+  /// Load area Sarijadi dari `assets/maps/Sarijadi_Area.json`
+  /// (BLOCK A, BLOCK B, SOIL 01, SOIL-02, ODP, ISP, PORT).
+  Future<void> _loadSarijadiAreaGeoJson() async {
     try {
-      final jsonStr = await rootBundle.loadString(
-        'assets/maps/Berau_3_Pit.json',
+      final polygons = await GeoJsonService.loadStyledPolygons(
+        'assets/maps/Sarijadi_Area.json',
       );
-      final data = json.decode(jsonStr) as Map<String, dynamic>;
-      final features = data['features'] as List<dynamic>?;
-      if (features == null) return;
-
-      final List<List<LatLng>> polygons = [];
-
-      for (final f in features) {
-        final feature = f as Map<String, dynamic>;
-        final geometry = feature['geometry'] as Map<String, dynamic>?;
-        if (geometry == null) continue;
-        final type = geometry['type'] as String?;
-        final coords = geometry['coordinates'];
-
-        if (type == 'Polygon') {
-          final rings = coords as List<dynamic>;
-          if (rings.isEmpty) continue;
-          final outerRing = rings.first as List<dynamic>;
-          final List<LatLng> latlngs =
-              outerRing
-                  .map(
-                    (p) => LatLng(
-                      (p[1] as num).toDouble(),
-                      (p[0] as num).toDouble(),
-                    ),
-                  )
-                  .toList();
-          polygons.add(latlngs);
-        }
-      }
-
+      if (!mounted) return;
       setState(() {
-        _pitPolygons = polygons;
+        _sarijadiAreaPolygons = polygons;
       });
     } catch (e) {
-      debugPrint('Failed to load Berau_3_Pit.json: $e');
+      debugPrint('Failed to load Sarijadi_Area: $e');
     }
+  }
+
+  /// Load strip blok dari `assets/maps/Sarijadi_Blocks_Strips.json`.
+  ///
+  /// Setiap strip punya `name` (A-01 .. A-12, B-01 .. B-03) dan `group`
+  /// (`unit-A` / `unit-B`) sehingga labelnya bisa ditampilkan.
+  Future<void> _loadBerauBlockStripGeoJson() async {
+    try {
+      final polygons = await GeoJsonService.loadStyledPolygons(
+        'assets/maps/Sarijadi_Blocks_Strips.json',
+      );
+      if (!mounted) return;
+      setState(() {
+        _blockStripPolygons = polygons;
+      });
+    } catch (e) {
+      debugPrint('Failed to load Sarijadi_Blocks_Strips: $e');
+    }
+  }
+
+  /// Load titik sudut dari `assets/maps/Sarijadi_Points.json`.
+  ///
+  /// Berisi 36 titik: 8 titik PIT (`group: pit`) dan 28 titik corner
+  /// (`group: corner`) dari BLOCK A/B, SOIL 01/02, ODP, ISP, dan PORT.
+  /// `properties.parent` menyimpan induk tiap titik, mis. `ODP-C1` -> `ODP`.
+  Future<void> _loadSarijadiPointsGeoJson() async {
+    try {
+      final points = await GeoJsonService.loadPoints(
+        'assets/maps/Sarijadi_Points.json',
+      );
+      if (!mounted) return;
+      setState(() {
+        _sarijadiPoints = points;
+      });
+    } catch (e) {
+      debugPrint('Failed to load Sarijadi_Points: $e');
+    }
+  }
+
+  /// Bangun marker untuk satu [StyledPoint].
+  ///
+  /// Titik digambar sebagai lingkaran kecil dengan outline putih agar
+  /// tetap terlihat di atas citra peta. Label nama hanya ditampilkan
+  /// ketika [_showSarijadiLabels] aktif supaya tidak memenuhi peta.
+  Marker _buildSarijadiPointMarker(StyledPoint p) {
+    final isPit = p.group == 'pit';
+
+    return Marker(
+      point: p.point,
+      width: 96,
+      height: 40,
+      key: ValueKey('sarijadi_point_${p.id ?? p.name}'),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (_showSarijadiLabels && p.name != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(3),
+                border: Border.all(color: p.color, width: 0.5),
+              ),
+              child: Text(
+                p.name!,
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: isPit ? FontWeight.bold : FontWeight.normal,
+                  color: const Color(0xFF000000),
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+          // Ukuran sedikit dibedakan agar PIT mudah dibedakan dari corner,
+          // tanpa memakai warna berbeda.
+          Container(
+            width: isPit ? 12 : 8,
+            height: isPit ? 12 : 8,
+            decoration: BoxDecoration(
+              color: p.color,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 1.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Load Berau_3_Track polylines
+  // Future<void> _loadBerauTrackGeoJson() async {
+  //   try {
+  //     final jsonStr = await rootBundle.loadString(
+  //       'assets/maps/Berau_3_Track.json',
+  //     );
+  //     final data = json.decode(jsonStr) as Map<String, dynamic>;
+  //     final features = data['features'] as List<dynamic>?;
+  //     if (features == null) return;
+
+  //     final List<List<LatLng>> polylines = [];
+
+  //     for (final f in features) {
+  //       final feature = f as Map<String, dynamic>;
+  //       final geometry = feature['geometry'] as Map<String, dynamic>?;
+  //       if (geometry == null) continue;
+  //       final type = geometry['type'] as String?;
+  //       final coords = geometry['coordinates'];
+
+  //       if (type == 'LineString') {
+  //         final points = coords as List<dynamic>;
+  //         final List<LatLng> latlngs =
+  //             points
+  //                 .map(
+  //                   (p) => LatLng(
+  //                     (p[1] as num).toDouble(),
+  //                     (p[0] as num).toDouble(),
+  //                   ),
+  //                 )
+  //                 .toList();
+  //         polylines.add(latlngs);
+  //       }
+  //     }
+
+  //     if (mounted) {
+  //       setState(() {
+  //         _trackPolylines = polylines;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Failed to load Berau_3_Track: $e');
+  //   }
+  // }
+
+  // Load Berau_3_Point markers
+  // Future<void> _loadBerauPointGeoJson() async {
+  //   try {
+  //     final jsonStr = await rootBundle.loadString(
+  //       'assets/maps/Berau_3_Point.json',
+  //     );
+  //     final data = json.decode(jsonStr) as Map<String, dynamic>;
+  //     final features = data['features'] as List<dynamic>?;
+  //     if (features == null) return;
+
+  //     final List<Marker> letters = [];
+  //     final List<Marker> pits = [];
+  //     final List<String> allNames = [];
+
+  //     for (final f in features) {
+  //       final feature = f as Map<String, dynamic>;
+  //       final geometry = feature['geometry'] as Map<String, dynamic>?;
+  //       final properties = feature['properties'] as Map<String, dynamic>?;
+  //       if (geometry == null) continue;
+  //       final type = geometry['type'] as String?;
+  //       final coords = geometry['coordinates'];
+  //       final name = properties?['name'] as String? ?? '';
+
+  //       if (type == 'Point') {
+  //         if (name.isNotEmpty && !allNames.contains(name)) {
+  //           allNames.add(name);
+  //         }
+  //         final point = coords as List<dynamic>;
+  //         final latLng = LatLng(
+  //           (point[1] as num).toDouble(),
+  //           (point[0] as num).toDouble(),
+  //         );
+  //         final marker = Marker(
+  //           point: latLng,
+  //           width: 80,
+  //           height: 60,
+  //           key: ValueKey('marker_$name'),
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Flexible(
+  //                 child: Container(
+  //                   padding: const EdgeInsets.symmetric(
+  //                     horizontal: 4,
+  //                     vertical: 1,
+  //                   ),
+  //                   decoration: BoxDecoration(
+  //                     color: Colors.white,
+  //                     borderRadius: BorderRadius.circular(3),
+  //                     border: Border.all(color: Colors.black, width: 0.5),
+  //                   ),
+  //                   child: Text(
+  //                     name,
+  //                     style: const TextStyle(
+  //                       fontSize: 10,
+  //                       fontWeight: FontWeight.bold,
+  //                       color: Colors.black,
+  //                     ),
+  //                     overflow: TextOverflow.ellipsis,
+  //                     maxLines: 1,
+  //                   ),
+  //                 ),
+  //               ),
+  //               const Icon(Icons.location_on, color: Colors.red, size: 18),
+  //             ],
+  //           ),
+  //         );
+
+  //         if (name.toUpperCase().startsWith('PIT')) {
+  //           pits.add(marker);
+  //         } else {
+  //           letters.add(marker);
+  //         }
+  //       }
+  //     }
+
+  //     if (mounted) {
+  //       setState(() {
+  //         _letterPointMarkers = letters;
+  //         _pitPointMarkers = pits;
+  //         _allPointNames = allNames;
+  //         _visiblePointNames = Set.from(allNames);
+  //       });
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Failed to load Berau_3_Point: $e');
+  //   }
+  // }
+
+  /// Bangun [Polygon] untuk satu area Sarijadi.
+  ///
+  /// Warna teks label dipilih otomatis (terang/gelap) agar kontras dengan
+  /// warna poligonnya, lalu diberi "halo" warna kebalikannya supaya tetap
+  /// terbaca meski citra peta di bawahnya terang/gelap.
+  Polygon<Object> _buildSarijadiPolygon(StyledPolygon p) {
+    final labelColor = GeoJsonService.labelColorFor(p.fillColor);
+    final haloColor = GeoJsonService.haloColorFor(labelColor);
+
+    return Polygon<Object>(
+      points: p.points,
+      color: p.fillColor,
+      borderColor: p.strokeColor,
+      borderStrokeWidth: p.strokeWidth,
+      label: _showSarijadiLabels ? p.name : null,
+      labelStyle: TextStyle(
+        fontSize: 9,
+        fontWeight: FontWeight.bold,
+        color: labelColor,
+        shadows: [
+          Shadow(color: haloColor, blurRadius: 2, offset: Offset.zero),
+        ],
+      ),
+    );
   }
 
   void _applyFilters() {
@@ -652,6 +882,9 @@ class _MapsScreenState extends State<MapsScreen> {
     final dateStr = _formatDateForNasa(_nasaDate);
 
     switch (_currentMapLayer) {
+      case 'osm':
+        // OpenStreetMap (OpenMap) standar - Open Data (ODbL), gratis.
+        return 'https://tiles.openfreemap.org/styles/liberty';
       case 'carto-light':
         // CartoDB Light - 100% gratis & legal untuk komersial
         return 'https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png';
@@ -737,6 +970,8 @@ class _MapsScreenState extends State<MapsScreen> {
 
   String _getTileAttribution() {
     switch (_currentMapLayer) {
+      case 'osm':
+        return '© OpenStreetMap contributors (ODbL)';
       case 'carto-light':
         return '© CARTO, © OpenStreetMap contributors';
       case 'wikimedia':
@@ -797,6 +1032,12 @@ class _MapsScreenState extends State<MapsScreen> {
     switch (_currentMapLayer) {
       case 'geotiff-base':
         return 18.0;
+      case 'osm':
+        return 19.0; // OpenStreetMap standar maksimal z19
+      case 'carto-light':
+        return 20.0; // CartoDB Light maksimal z20
+      case 'wikimedia':
+        return 19.0; // Wikimedia osm-intl maksimal z19
       // NASA GIBS layers with enhanced zoom levels
       case 'nasa-modis-terra':
       case 'nasa-modis-aqua':
@@ -852,6 +1093,12 @@ class _MapsScreenState extends State<MapsScreen> {
       case 'geotiff-base':
         // Tidak relevan untuk GeoTIFF overlay statis
         return 18;
+      case 'osm':
+        return 19; // OpenStreetMap standar maksimal z19
+      case 'carto-light':
+        return 20; // CartoDB Light maksimal z20
+      case 'wikimedia':
+        return 19; // Wikimedia osm-intl maksimal z19
       // NASA GIBS layers with enhanced zoom levels
       case 'nasa-modis-terra':
       case 'nasa-modis-aqua':
@@ -1042,40 +1289,154 @@ class _MapsScreenState extends State<MapsScreen> {
                                       ],
                                     ),
                                   ),
-                                // Berau_3_Blok polygons layer (always on top of base)
-                                if (_showBlokPolygons &&
-                                    _blokPolygons.isNotEmpty)
+                                // Layer Sarijadi digambar dari bawah ke atas:
+                                // grid box (terluas) -> area -> block strip (terkecil).
+                                // Grid box memakai fill transparan supaya citra
+                                // peta di bawahnya tetap terlihat.
+                                if (_showSarijadiBlockPolygons &&
+                                    _sarijadiBlockPolygons.isNotEmpty)
                                   PolygonLayer(
-                                    polygons:
-                                        _blokPolygons
+                                    polygonLabels: _showSarijadiLabels,
+                                    drawLabelsLast: false,
+                                    polygons: _sarijadiBlockPolygons
+                                        .map(
+                                          (p) => Polygon<Object>(
+                                            points: p.points,
+                                            color: Colors.transparent,
+                                            borderColor: p.strokeColor,
+                                            borderStrokeWidth:
+                                                p.strokeWidth + 1,
+                                            label: _showSarijadiLabels
+                                                ? p.name
+                                                : null,
+                                            labelStyle: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              shadows: [
+                                                Shadow(
+                                                  color: Color(
+                                                    0xCC000000,
+                                                  ),
+                                                  blurRadius: 3,
+                                                  offset: Offset.zero,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                // Sarijadi_Area polygons layer
+                                if (_showSarijadiAreaPolygons &&
+                                    _sarijadiAreaPolygons.isNotEmpty)
+                                  PolygonLayer(
+                                    polygonLabels: _showSarijadiLabels,
+                                    drawLabelsLast: false,
+                                    polygons: _sarijadiAreaPolygons
+                                        .map(_buildSarijadiPolygon)
+                                        .toList(),
+                                  ),
+                                // Sarijadi_Blocks_Strips polygons layer
+                                if (_showBlockStripPolygons &&
+                                    _blockStripPolygons.isNotEmpty)
+                                  PolygonLayer(
+                                    polygonLabels: _showSarijadiLabels,
+                                    drawLabelsLast: true,
+                                    polygons: _blockStripPolygons
+                                        .map(_buildSarijadiPolygon)
+                                        .toList(),
+                                  ),
+                                // Berau_3_Track polylines layer
+                                if (_showTrackPolylines &&
+                                    _trackPolylines.isNotEmpty)
+                                  PolylineLayer(
+                                    polylines:
+                                        _trackPolylines
                                             .map(
-                                              (ring) => Polygon<Object>(
-                                                points: ring,
-                                                color:
-                                                    Colors.transparent, // fill
-                                                borderColor: Colors.deepOrange,
-                                                borderStrokeWidth: 2,
+                                              (points) => Polyline(
+                                                points: points,
+                                                color: Colors.red,
+                                                strokeWidth: 4,
                                               ),
                                             )
                                             .toList(),
                                   ),
-                                // Berau_3_Pit polygons layer
-                                if (_showPitPolygons && _pitPolygons.isNotEmpty)
-                                  PolygonLayer(
-                                    polygons:
-                                        _pitPolygons
-                                            .map(
-                                              (ring) => Polygon<Object>(
-                                                points: ring,
-                                                color: Colors.blue.withOpacity(
-                                                  0.15,
-                                                ), // fill
-                                                borderColor: Colors.blue,
-                                                borderStrokeWidth: 2,
-                                              ),
+                                // Sarijadi_Points: titik sudut tiap area + titik PIT.
+                                if (_showSarijadiPoints &&
+                                    _sarijadiPoints.isNotEmpty)
+                                  MarkerLayer(
+                                    markers:
+                                        _sarijadiPoints
+                                            .where(
+                                              (p) =>
+                                                  _showCornerPoints ||
+                                                  p.group != 'corner',
                                             )
+                                            .map(_buildSarijadiPointMarker)
                                             .toList(),
                                   ),
+                                // Berau_3_Point markers layer
+                                if (_showPointMarkers) ...[
+                                  if (_showLetterPoints &&
+                                      _letterPointMarkers.isNotEmpty)
+                                    MarkerLayer(
+                                      markers:
+                                          _letterPointMarkers.where((m) {
+                                            final name =
+                                                ((m.child as Column).children[0]
+                                                                as Flexible)
+                                                            .child
+                                                        is Container
+                                                    ? (((m.child as Column).children[0]
+                                                                            as Flexible)
+                                                                        .child
+                                                                    as Container)
+                                                                .child
+                                                            is Text
+                                                        ? (((m.child as Column).children[0]
+                                                                            as Flexible)
+                                                                        .child
+                                                                    as Container)
+                                                                .child
+                                                            as Text
+                                                        : null
+                                                    : null;
+                                            return _visiblePointNames.contains(
+                                              name?.data ?? '',
+                                            );
+                                          }).toList(),
+                                    ),
+                                  if (_showPitPoints &&
+                                      _pitPointMarkers.isNotEmpty)
+                                    MarkerLayer(
+                                      markers:
+                                          _pitPointMarkers.where((m) {
+                                            final name =
+                                                ((m.child as Column).children[0]
+                                                                as Flexible)
+                                                            .child
+                                                        is Container
+                                                    ? (((m.child as Column).children[0]
+                                                                            as Flexible)
+                                                                        .child
+                                                                    as Container)
+                                                                .child
+                                                            is Text
+                                                        ? (((m.child as Column).children[0]
+                                                                            as Flexible)
+                                                                        .child
+                                                                    as Container)
+                                                                .child
+                                                            as Text
+                                                        : null
+                                                    : null;
+                                            return _visiblePointNames.contains(
+                                              name?.data ?? '',
+                                            );
+                                          }).toList(),
+                                    ),
+                                ],
                                 if (_showTracking)
                                   PolylineLayer(
                                     polylines: _buildTrackingPolylines(
@@ -1249,8 +1610,8 @@ class _MapsScreenState extends State<MapsScreen> {
                                 constraints: BoxConstraints(
                                   maxHeight:
                                       MediaQuery.of(context).size.height -
-                                      200, // Leave space for other elements
-                                  maxWidth: 300, // Limit maximum width
+                                      120, // Increased space
+                                  maxWidth: 300,
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -1270,20 +1631,86 @@ class _MapsScreenState extends State<MapsScreen> {
                                       },
                                       getStatusColor: _getStatusColor,
                                     ),
-                                    // const SizedBox(height: 8),
-                                    // // Layer Control
-                                    // Flexible(
-                                    //   child: LayerControl(
-                                    //     currentLayer: _currentMapLayer,
-                                    //     onLayerChanged: (layer) {
-                                    //       setState(() => _currentMapLayer = layer);
-                                    //     },
-                                    //     nasaDate: _nasaDate,
-                                    //     onNasaDateChanged: (date) {
-                                    //       setState(() => _nasaDate = date);
-                                    //     },
-                                    //   ),
-                                    // ),
+                                    const SizedBox(height: 8),
+                                    // Layer Control
+                                    LayerControl(
+                                      currentLayer: _currentMapLayer,
+                                      onLayerChanged: (layer) {
+                                        setState(
+                                          () => _currentMapLayer = layer,
+                                        );
+                                      },
+                                      nasaDate: _nasaDate,
+                                      onNasaDateChanged: (date) {
+                                        setState(() => _nasaDate = date);
+                                      },
+                                      showBlockStrip: _showBlockStripPolygons,
+                                      onShowBlockStripChanged:
+                                          (v) => setState(
+                                            () => _showBlockStripPolygons = v,
+                                          ),
+                                      showTrack: _showTrackPolylines,
+                                      onShowTrackChanged:
+                                          (v) => setState(
+                                            () => _showTrackPolylines = v,
+                                          ),
+                                      showPoint: _showPointMarkers,
+                                      onShowPointChanged:
+                                          (v) => setState(
+                                            () => _showPointMarkers = v,
+                                          ),
+                                      showLetterPoints: _showLetterPoints,
+                                      onShowLetterPointsChanged:
+                                          (v) => setState(
+                                            () => _showLetterPoints = v,
+                                          ),
+                                      showPitPoints: _showPitPoints,
+                                      onShowPitPointsChanged:
+                                          (v) => setState(
+                                            () => _showPitPoints = v,
+                                          ),
+                                      showSarijadiBlocks: _showSarijadiBlockPolygons,
+                                      onShowSarijadiBlocksChanged:
+                                          (v) => setState(
+                                            () =>
+                                                _showSarijadiBlockPolygons = v,
+                                          ),
+                                      showSarijadiArea: _showSarijadiAreaPolygons,
+                                      onShowSarijadiAreaChanged:
+                                          (v) => setState(
+                                            () =>
+                                                _showSarijadiAreaPolygons = v,
+                                          ),
+                                      showSarijadiPoints: _showSarijadiPoints,
+                                      onShowSarijadiPointsChanged:
+                                          (v) => setState(
+                                            () => _showSarijadiPoints = v,
+                                          ),
+                                      showCornerPoints: _showCornerPoints,
+                                      onShowCornerPointsChanged:
+                                          (v) => setState(
+                                            () => _showCornerPoints = v,
+                                          ),
+                                      showSarijadiLabels: _showSarijadiLabels,
+                                      onShowSarijadiLabelsChanged:
+                                          (v) => setState(
+                                            () => _showSarijadiLabels = v,
+                                          ),
+                                      allPointNames: _allPointNames,
+                                      visiblePointNames: _visiblePointNames,
+                                      onPointVisibilityChanged: (
+                                        name,
+                                        visible,
+                                      ) {
+                                        setState(() {
+                                          if (visible) {
+                                            _visiblePointNames.add(name);
+                                          } else {
+                                            _visiblePointNames.remove(name);
+                                          }
+                                        });
+                                      },
+                                    ),
                                   ],
                                 ),
                               ),

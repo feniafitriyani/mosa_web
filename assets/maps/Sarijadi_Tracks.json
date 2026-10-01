@@ -1,0 +1,28 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [107.5756433, -6.8794399],
+          [107.5743831, -6.8781658],
+          [107.5732107, -6.8767453],
+          [107.5730349, -6.8754858],
+          [107.5731961, -6.8745486],
+          [107.5734305, -6.8735381],
+          [107.5737236, -6.8723665]
+        ]
+      }
+    },
+    { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [107.5756433, -6.8794399] } },
+    { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [107.5743831, -6.8781658] } },
+    { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [107.5732107, -6.8767453] } },
+    { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [107.5730349, -6.8754858] } },
+    { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [107.5731961, -6.8745486] } },
+    { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [107.5734305, -6.8735381] } },
+    { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [107.5737236, -6.8723665] } }
+  ]
+}

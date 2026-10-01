@@ -1,0 +1,581 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+        "type": "Feature",
+        "properties": {
+            "id": 28,
+            "name": "PIT-A01-C1",
+            "group": "pit",
+            "parent": "unit-A"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5755745,
+            -6.8812146
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 29,
+            "name": "PIT-A01-C2",
+            "group": "pit",
+            "parent": "unit-A"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5756572,
+            -6.8815196
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 30,
+            "name": "PIT-A01-C3",
+            "group": "pit",
+            "parent": "unit-A"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5747496,
+            -6.8818052
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 31,
+            "name": "PIT-A01-C4",
+            "group": "pit",
+            "parent": "unit-A"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5746699,
+            -6.8814975
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 32,
+            "name": "PIT-B01-C1",
+            "group": "pit",
+            "parent": "unit-B"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.57906486403803,
+            -6.871832227799241
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 33,
+            "name": "PIT-B01-C2",
+            "group": "pit",
+            "parent": "unit-B"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.57901075124644,
+            -6.87198155543469
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 34,
+            "name": "PIT-B01-C3",
+            "group": "pit",
+            "parent": "unit-B"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.57853117100555,
+            -6.8717867279940545
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 35,
+            "name": "PIT-B01-C4",
+            "group": "pit",
+            "parent": "unit-B"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5786073,
+            -6.8716524
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 36,
+            "name": "BLOCK-A-C1",
+            "group": "corner",
+            "parent": "BLOCK-A"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.576079,
+            -6.8809951
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 37,
+            "name": "BLOCK-A-C2",
+            "group": "corner",
+            "parent": "BLOCK-A"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.57622089063844,
+            -6.881449349850029
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 38,
+            "name": "BLOCK-A-C3",
+            "group": "corner",
+            "parent": "BLOCK-A"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.57472777355638,
+            -6.881922911760309
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 39,
+            "name": "BLOCK-A-C4",
+            "group": "corner",
+            "parent": "BLOCK-A"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.574596,
+            -6.8814856
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 40,
+            "name": "BLOCK-B-C1",
+            "group": "corner",
+            "parent": "BLOCK-B"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5770681,
+            -6.8707208
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 41,
+            "name": "BLOCK-B-C2",
+            "group": "corner",
+            "parent": "BLOCK-B"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5788906,
+            -6.8725353
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 42,
+            "name": "BLOCK-B-C3",
+            "group": "corner",
+            "parent": "BLOCK-B"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5792875578833,
+            -6.871558249798157
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 43,
+            "name": "BLOCK-B-C4",
+            "group": "corner",
+            "parent": "BLOCK-B"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.57659667282867,
+            -6.871643589426536
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 44,
+            "name": "SOIL-01-C1",
+            "group": "corner",
+            "parent": "SOIL-01"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.57556527164914,
+            -6.8788677352553815
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 45,
+            "name": "SOIL-01-C2",
+            "group": "corner",
+            "parent": "SOIL-01"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5759377,
+            -6.8790379
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 46,
+            "name": "SOIL-01-C3",
+            "group": "corner",
+            "parent": "SOIL-01"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5757697,
+            -6.8793876
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 47,
+            "name": "SOIL-01-C4",
+            "group": "corner",
+            "parent": "SOIL-01"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.575388,
+            -6.8792107
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 48,
+            "name": "SOIL-02-C1",
+            "group": "corner",
+            "parent": "SOIL-02"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5769115,
+            -6.8734787
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 49,
+            "name": "SOIL-02-C2",
+            "group": "corner",
+            "parent": "SOIL-02"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5769132,
+            -6.8740381
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 50,
+            "name": "SOIL-02-C3",
+            "group": "corner",
+            "parent": "SOIL-02"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.576353,
+            -6.8740381
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 51,
+            "name": "SOIL-02-C4",
+            "group": "corner",
+            "parent": "SOIL-02"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5763519,
+            -6.8734769
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 52,
+            "name": "ODP-C1",
+            "group": "corner",
+            "parent": "ODP"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5778191,
+            -6.8754261
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 53,
+            "name": "ODP-C2",
+            "group": "corner",
+            "parent": "ODP"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5784492,
+            -6.8754261
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 54,
+            "name": "ODP-C3",
+            "group": "corner",
+            "parent": "ODP"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5784492,
+            -6.8761143
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 55,
+            "name": "ODP-C4",
+            "group": "corner",
+            "parent": "ODP"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5778191,
+            -6.876101499519878
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 56,
+            "name": "ISP-C1",
+            "group": "corner",
+            "parent": "ISP"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5728413,
+            -6.8772033
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 57,
+            "name": "ISP-C2",
+            "group": "corner",
+            "parent": "ISP"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5728495,
+            -6.8776235
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 58,
+            "name": "ISP-C3",
+            "group": "corner",
+            "parent": "ISP"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.572331,
+            -6.8776578
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 59,
+            "name": "ISP-C4",
+            "group": "corner",
+            "parent": "ISP"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.572331,
+            -6.8772206
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 60,
+            "name": "PORT-C1",
+            "group": "corner",
+            "parent": "PORT"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5723726,
+            -6.8751929
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 61,
+            "name": "PORT-C2",
+            "group": "corner",
+            "parent": "PORT"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5723726,
+            -6.876135599057647
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 62,
+            "name": "PORT-C3",
+            "group": "corner",
+            "parent": "PORT"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5705411,
+            -6.8762182
+            ]
+        }
+        },
+        {
+        "type": "Feature",
+        "properties": {
+            "id": 63,
+            "name": "PORT-C4",
+            "group": "corner",
+            "parent": "PORT"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [
+            107.5705772,
+            -6.8752497
+            ]
+        }
+        }
+      ]
+}

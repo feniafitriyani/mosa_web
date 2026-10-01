@@ -1,0 +1,457 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "A" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [117.450164, 2.067526]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "B" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [117.446233, 2.071500]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "C" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [117.442576, 2.075930]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "D" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [117.442028, 2.079859]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "E" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [117.442531, 2.082782]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "F" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [117.443262, 2.085934]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "G" },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [117.444176, 2.089588]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PIT A01 A"} ,
+      "geometry": {
+        "coordinates": [
+          117.4524560198958,
+          2.0648493370758274
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PIT A01 B" },
+      "geometry": {
+        "coordinates": [
+          117.453149505797,
+          2.0638097833167848
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PIT A01 C" },
+      "geometry": {
+        "coordinates": [
+          117.45014671183878,
+          2.0620009581558634
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PIT A01 D" },
+      "geometry": {
+        "coordinates": [
+          117.44945042479884,
+          2.0630502427827224
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PIT B01 A" },
+      "geometry": {
+        "coordinates": [
+          117.45044953006851,
+          2.0928511080853696
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PIT B01 B" },
+      "geometry": {
+        "coordinates": [
+          117.45074967969703,
+          2.0924974363469744
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PIT B01 C" },
+      "geometry": {
+        "coordinates": [
+          117.4493984552081,
+          2.091443245735107
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PIT B01 D" },
+      "geometry": {
+        "coordinates": [
+          117.4490999211614,
+          2.091801247909544
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"name" : "BLOCK A A" },
+      "geometry": {
+        "coordinates": [
+          117.45250021697143,
+          2.065399649556781
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "BLOCK A B" },
+      "geometry": {
+        "coordinates": [
+          117.45399936706445,
+          2.063199956510047
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "BLOCK A C" },
+      "geometry": {
+        "coordinates": [
+          117.45079951079583,
+          2.0611003416348552
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"name" : "BLOCK A D" },
+      "geometry": {
+        "coordinates": [
+          117.44929984731118,
+          2.0633001499548556
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {"name" : "BLOCK B A"},
+      "geometry": {
+        "coordinates": [
+          117.4515982592082,
+          2.0954101661718454
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "BLOCK B B" },
+      "geometry": {
+        "coordinates": [
+          117.4542043214849,
+          2.0923939976975277
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "BLOCK B C" },
+      "geometry": {
+        "coordinates": [
+          117.44889748175348,
+          2.0880940585384593
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "BLOCK B D" },
+      "geometry": {
+        "coordinates": [
+          117.44629985891908,
+          2.091095849717533
+        ],
+        "type": "Point"
+      }
+    },
+     {
+      "type": "Feature",
+      "properties": {"name" : "SOIL 01 A"},
+      "geometry": {
+        "coordinates": [
+          117.4523710130967,
+          2.07275157349531
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "SOIL 01 B" },
+      "geometry": {
+        "coordinates": [
+          117.45324813861458,
+          2.0712939423695502
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "SOIL 01 C" },
+      "geometry": {
+        "coordinates": [
+          117.45177784616436,
+          2.0704390581819325
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "SOIL 01 D" },
+      "geometry": {
+        "coordinates": [
+          117.45094913587462,
+          2.071961820320908
+        ],
+        "type": "Point"
+      }
+    },
+     {
+      "type": "Feature",
+      "properties": {"name" : "SOIL-02 A"},
+      "geometry": {
+        "coordinates": [
+          117.45411986691153,
+          2.0861194917267483
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "SOIL-02 B" },
+      "geometry": {
+        "coordinates": [
+          117.45412511200408,
+          2.08437451169776
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "SOIL-02 C" },
+      "geometry": {
+        "coordinates": [
+          117.45237785601057,
+          2.0843746426034926
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "SOIL-02 D" },
+      "geometry": {
+        "coordinates": [
+          117.4523744909352,
+          2.0861249549502787
+        ],
+        "type": "Point"
+      }
+    },
+     {
+      "type": "Feature",
+      "properties": { "name": "ODP A" },
+      "geometry": {
+        "coordinates": [
+          117.44986802412956,
+          2.079736656393095
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "ODP B" },
+      "geometry": {
+        "coordinates": [
+          117.4519761854591,
+          2.079736656393095
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "ODP C" },
+      "geometry": {
+        "coordinates": [
+          117.4519761854591,
+          2.077261196571783
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "ODP D" },
+      "geometry": {
+        "coordinates": [
+          117.44986802412956,
+          2.077261196571783
+        ],
+        "type": "Point"
+      }
+    },
+     {
+      "type": "Feature",
+      "properties": {"name" : "ISP A" },
+      "geometry": {
+        "coordinates": [
+          117.43999928329828,
+          2.085961455849443
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "ISP B" },
+      "geometry": {
+        "coordinates": [
+          117.44126004908156,
+          2.0847004219123733
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "ISP C" },
+      "geometry": {
+        "coordinates": [
+          117.43974990223268,
+          2.0836000104566494
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "ISP D" },
+      "geometry": {
+        "coordinates": [
+          117.43849000420977,
+          2.084850398696787
+        ],
+        "type": "Point"
+      }
+    },
+      {
+      "type": "Feature",
+      "properties": { "name": "PORT A" },
+      "geometry": {
+        "coordinates": [
+          117.43794857875247,
+          2.08999794766018
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PORT B" },
+      "geometry": {
+        "coordinates": [
+          117.43984840224402,
+          2.087996986782528
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PORT C" },
+      "geometry": {
+        "coordinates": [
+          117.43785020596118,
+          2.0858574822071176
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "PORT D" },
+      "geometry": {
+        "coordinates": [
+          117.43595222219659,
+          2.0878496349348694
+        ],
+        "type": "Point"
+      }
+    }
+  ]
+}
