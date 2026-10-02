@@ -1649,26 +1649,6 @@ class _MapsScreenState extends State<MapsScreen> {
                                           (v) => setState(
                                             () => _showBlockStripPolygons = v,
                                           ),
-                                      showTrack: _showTrackPolylines,
-                                      onShowTrackChanged:
-                                          (v) => setState(
-                                            () => _showTrackPolylines = v,
-                                          ),
-                                      showPoint: _showPointMarkers,
-                                      onShowPointChanged:
-                                          (v) => setState(
-                                            () => _showPointMarkers = v,
-                                          ),
-                                      showLetterPoints: _showLetterPoints,
-                                      onShowLetterPointsChanged:
-                                          (v) => setState(
-                                            () => _showLetterPoints = v,
-                                          ),
-                                      showPitPoints: _showPitPoints,
-                                      onShowPitPointsChanged:
-                                          (v) => setState(
-                                            () => _showPitPoints = v,
-                                          ),
                                       showSarijadiBlocks: _showSarijadiBlockPolygons,
                                       onShowSarijadiBlocksChanged:
                                           (v) => setState(
@@ -1696,20 +1676,6 @@ class _MapsScreenState extends State<MapsScreen> {
                                           (v) => setState(
                                             () => _showSarijadiLabels = v,
                                           ),
-                                      allPointNames: _allPointNames,
-                                      visiblePointNames: _visiblePointNames,
-                                      onPointVisibilityChanged: (
-                                        name,
-                                        visible,
-                                      ) {
-                                        setState(() {
-                                          if (visible) {
-                                            _visiblePointNames.add(name);
-                                          } else {
-                                            _visiblePointNames.remove(name);
-                                          }
-                                        });
-                                      },
                                     ),
                                   ],
                                 ),
